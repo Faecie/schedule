@@ -1,9 +1,10 @@
 {
     "name": "faecie/schedule-bundle",
     "type": "symfony-bundle",
-    "license": "public",
+    "license": "MIT",
     "description": "Bundle for scheduling tasks like a cron",
     "keywords": ["scheduler", "messaging", "cron"],
+    "minimum-stability": "stable",
     "authors": [
         {
             "name": "Umyarov Ruslan",
@@ -24,7 +25,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "0.1-dev"
         }
     }
 }
