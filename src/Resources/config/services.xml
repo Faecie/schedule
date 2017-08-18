@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+
+<container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://symfony.com/schema/dic/services"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <!--Inner schedule tasks service definition-->
+        <service id="faecie.schedule.service.schedule.inner"
+                 class="Faecie\ScheduleBundle\Schedule\InnerScheduleService"
+                 public="false">
+            <argument type="service" id="kernel"/>
+        </service>
+        <!--Schedule runner definition-->
+        <service id="faecie.schedule.service.schedule.runner"
+                 class="Faecie\ScheduleBundle\Schedule\ScheduleRunner" public="true">
+            <argument type="service" id="faecie.schedule.service.schedule.inner"/>
+            <argument type="service" id="event_dispatcher"/>
+        </service>
+        <!--Scheduled tasks service definition-->
+        <service id="faecie.schedule.service.schedule"
+                 class="Faecie\ScheduleBundle\Schedule\ScheduleService"
+                 abstract="true">
+        </service>
+    </services>
+</container>
