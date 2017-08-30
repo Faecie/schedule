@@ -194,31 +194,12 @@ class ScheduleRunner
                 $this->forcedCommands,
                 true
             );
-            $isTimeToRunTask = floor($this->getNextRunDate($taskSchedule)->getTimestamp() / 60) === floor(time() / 60);
+            $isTimeToRunTask = floor($taskSchedule->getNextRunDate()->getTimestamp() / 60) === floor(time() / 60);
 
             if ($isForcedTask || $isTimeToRunTask) {
                 yield $taskSchedule;
             }
         }
-    }
-
-    /**
-     * Find next date and time to run execution of scheduled job
-     *
-     * @param JobSchedule $jobSchedule Scheduled task
-     *
-     * @return \DateTime
-     */
-    private function getNextRunDate(JobSchedule $jobSchedule)
-    {
-        $result    = new \DateTime();
-        $execution = new JobScheduleExecution($jobSchedule);
-
-        return $result->setTimestamp(
-            $jobSchedule->getFirstRunDateTime()->getTimestamp() +
-            $jobSchedule->getFrequency() *
-            (60 * $execution->getExecutionNumber())
-        );
     }
 
     /**
