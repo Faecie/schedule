@@ -43,6 +43,14 @@ class JobScheduleExecution extends AbstractJobSchedule
     private $executionNumber;
 
     /**
+     * Planned date of execution
+     *
+     * @var \DateTime
+     * @ORM\Column(name="scheduled_date", type="datetime")
+     */
+    private $scheduledDate;
+
+    /**
      * Current state of this execution
      *
      * @var int
@@ -92,34 +100,15 @@ class JobScheduleExecution extends AbstractJobSchedule
      */
     public function __construct($jobSchedule, $command = null)
     {
-        $executionNumber = $this->calculateNextExecutionNumber();
-
         $this->jobSchedule     = $jobSchedule;
         $this->startDate       = new \DateTime();
-        $this->executionNumber = $executionNumber;
+        $this->executionNumber = $jobSchedule->calculateNextExecutionNumber();
+        $this->scheduledDate   = $jobSchedule->getNextRunDate();
         $this->commandClass    = $command ?: $jobSchedule->getJob()->getClassName();
 
         $this->setArguments($jobSchedule->getArguments());
         $this->setState(ExecutionStateEnum::NOT_STARTED);
         $this->setLastResultInfo(ExecutionStateMessageEnum::NOT_STARTED);
-    }
-
-    /**
-     * Calculates next execution number according on given date
-     *
-     * @param \DateTime|null $date The date to calculate execution number next to it
-     *
-     * @return int
-     */
-    public function calculateNextExecutionNumber(\DateTime $date = null)
-    {
-        $date   = $date ?: new DateTime();
-        $result = ceil(
-            ($date->getTimestamp() - $this->jobSchedule->getFirstRunDateTime()->getTimestamp()) /
-            ($this->frequency * 60)
-        );
-
-        return $result;
     }
 
     /**
@@ -192,15 +181,7 @@ class JobScheduleExecution extends AbstractJobSchedule
      */
     public function getScheduleDateTime()
     {
-        $result = new DateTime();
-
-        return $result->setTimestamp(
-            $this->jobSchedule->getFirstRunDateTime()->getTimestamp() +
-            (
-                $this->jobSchedule->getFrequency() *
-                (60 * $this->executionNumber)
-            )
-        );
+        return $this->scheduledDate;
     }
 
     /**

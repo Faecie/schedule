@@ -87,6 +87,20 @@ class JobSchedule extends AbstractJobSchedule
     private $taskScheduledRunResult;
 
     /**
+     * Next run date
+     *
+     * @var \DateTime
+     */
+    private $nextRunDate;
+
+    /**
+     * Next execution number
+     *
+     * @var int
+     */
+    private $nextExecutionNumber;
+
+    /**
      * Constructor
      *
      * @param int      $frequency Frequency between executing
@@ -168,19 +182,6 @@ class JobSchedule extends AbstractJobSchedule
     }
 
     /**
-     * Returns date and time of the first time when the job had to be started off
-     *
-     * @return DateTime
-     */
-    public function getFirstRunDateTime()
-    {
-        $createdDate = $this->getCreatedDate()->format('Ymd');
-        $time        = $this->getTime()->format('Hi');
-
-        return \DateTime::createFromFormat('YmdHi', $createdDate . $time);
-    }
-
-    /**
      * Returns the date when this job was scheduled
      *
      * @return DateTime
@@ -243,4 +244,83 @@ class JobSchedule extends AbstractJobSchedule
         $this->updatedDate = new DateTime();
     }
 
+    /**
+     * Calculates next execution date time according on given date and time
+     *
+     * @param \DateTime|null $date The date to calculate execution date next to it
+     *
+     * @return \DateTime
+     */
+    public function getNextRunDate(\DateTime $date = null)
+    {
+        if (!$this->nextRunDate) {
+            $date   = $date ?: new \DateTime();
+            $result = new \DateTime();
+
+            $this->nextRunDate = $result->setTimestamp(
+                $this->getFirstRunDateTime()->getTimestamp() +
+                $this->getFrequency() *
+                (60 * $this->calculateNextExecutionNumber($date))
+            );
+        }
+
+        return $this->nextRunDate;
+    }
+
+    /**
+     * Calculates next execution number according on given date
+     *
+     * @param \DateTime|null $date The date to calculate execution number next to it
+     *
+     * @return int
+     */
+    public function calculateNextExecutionNumber(\DateTime $date = null)
+    {
+        if (!$this->nextExecutionNumber) {
+            $date                      = $date ?: new DateTime();
+            $this->nextExecutionNumber = ceil(
+                ($date->getTimestamp() - $this->getFirstRunDateTime()->getTimestamp()) /
+                ($this->frequency * 60)
+            );
+        }
+
+        return $this->nextExecutionNumber;
+    }
+
+    /**
+     * Set time
+     *
+     * @param DateTime $time time
+     *
+     * @return void
+     */
+    public function setTime($time)
+    {
+        $this->time = $time;
+    }
+
+    /**
+     * Set frequency
+     *
+     * @param int $frequency frequency
+     *
+     * @return void
+     */
+    public function setFrequency($frequency)
+    {
+        $this->frequency = $frequency;
+    }
+
+    /**
+     * Returns date and time of the first time when the job had to be started off
+     *
+     * @return DateTime
+     */
+    private function getFirstRunDateTime()
+    {
+        $createdDate = $this->getCreatedDate()->format('Ymd');
+        $time        = $this->getTime()->format('Hi');
+
+        return \DateTime::createFromFormat('YmdHi', $createdDate . $time);
+    }
 }
